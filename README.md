@@ -1,5 +1,7 @@
 # AttendEase: Smart Attendance Request System
 
+> 🚧 **UNDER DEVELOPMENT**: This project is currently a work in progress. Features, APIs, and the database schema are subject to change without notice.
+
 AttendEase is a comprehensive, multi-tier web application designed to streamline the process of submitting, reviewing, and approving student attendance exception requests (such as Medical Leave, Special OD, and regular On-Duty requests).
 
 ##  Features
