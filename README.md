@@ -2,6 +2,8 @@
 
 > UNDER DEVELOPMENT: This project is currently a work in progress. Features, APIs, and the database schema are subject to change without notice.
 
+![AttendEase Dashboard Preview](screenshots/dashboard_preview.png)
+
 Paper-based leave requests and manual tracking are things of the past. AttendEase provides a modern, high-performance solution for students and faculty to manage attendance exceptions with total transparency and security.
 
 ## The Mission
