@@ -1,0 +1,369 @@
+ATTENDANCE REQUEST SYSTEM
+Complete Implementation Plan
+_______________________________________________
+4-Level Approval Workflow  |  Leave Management  |  Google Drive Integration
+1. System Overview
+This system manages student leave and OD applications through a structured 4-level approval workflow. It handles three types of leave, enforces semester limits, auto-generates Excel records, and integrates letter templates for formal submissions.
+Level
+Role
+Scope
+Leave Types Handled
+Level 1
+Student
+Own requests only
+Submit OD, Medical, Special OD
+Level 2
+Class Coordinator
+Own division only
+OD, Medical, Special OD
+Level 3
+Year-wise Coordinator
+Own year, all divisions
+OD, Medical, Special OD
+Level 4
+Chairperson
+All sections, all years
+Special OD only
+2. Leave Types & Rules
+Leave Type
+Description
+Semester Limit
+Goes To Chairperson?
+OD
+Events, hackathons, ideathons, competitions
+5 days max
+No — ends at Year Coordinator
+Medical Leave
+Illness, hospitalization, medical procedures
+5 days max
+No — ends at Year Coordinator
+Special OD
+Representing the college at external events
+Unlimited
+Yes — mandatory
+Submission Deadline: Student must submit the application within 6 days of the first absence date. Applications beyond this window are automatically rejected by the system.
+3. Database Schema
+3.1  users
+id              INT PRIMARY KEY AUTO_INCREMENT
+name            VARCHAR(100)
+email           VARCHAR(100) UNIQUE
+password_hash   TEXT
+role            ENUM('STUDENT','CLASS_COORD','YEAR_COORD','CHAIRPERSON','ADMIN')
+department      VARCHAR(50)
+year            INT           -- for students (1/2/3/4)
+division        VARCHAR(10)   -- e.g. A, B, C
+created_at      TIMESTAMP
+3.2  subjects
+id              INT PRIMARY KEY AUTO_INCREMENT
+name            VARCHAR(100)
+code            VARCHAR(20)
+department      VARCHAR(50)
+year            INT
+3.3  student_subjects
+id              INT PRIMARY KEY AUTO_INCREMENT
+student_id      INT FK -> users(id)
+subject_id      INT FK -> subjects(id)
+teacher_name    VARCHAR(100)
+-- One row per subject per student.
+-- Example: Student 101 with 6 subjects = 6 rows.
+-- Used to dynamically generate Excel columns.
+3.4  leave_balances
+id              INT PRIMARY KEY AUTO_INCREMENT
+student_id      INT FK -> users(id)
+semester        VARCHAR(20)       -- e.g. '2024-SEM1'
+od_used         INT DEFAULT 0     -- max 5
+medical_used    INT DEFAULT 0     -- max 5
+-- Special OD is unlimited, not tracked here.
+3.5  attendance_requests
+id                  INT PRIMARY KEY AUTO_INCREMENT
+student_id          INT FK -> users(id)
+leave_type          ENUM('OD','MEDICAL','SPECIAL_OD')
+from_date           DATE
+to_date             DATE
+days_count          INT
+reason              TEXT
+letter_content      TEXT          -- if typed digitally
+letter_type         ENUM('DIGITAL','PHYSICAL')
+proof_file_url      VARCHAR(255)  -- uploaded scan / certificate
+proof_file_type     ENUM('PDF','JPG','PNG')
+semester            VARCHAR(20)
+submitted_at        TIMESTAMP
+deadline_date       DATE          -- submitted_at + 6 days
+parent_request_id   INT FK -> attendance_requests(id) NULL
+status  ENUM(
+  'SUBMITTED',
+  'CLASS_COORD_APPROVED',
+  'YEAR_COORD_APPROVED',
+  'CHAIRPERSON_APPROVED',
+  'REJECTED',
+  'RESUBMISSION_REQUESTED',
+  'CANCELLED'
+)
+rejected_by         ENUM('CLASS_COORD','YEAR_COORD','CHAIRPERSON') NULL
+rejection_reason    TEXT NULL
+resubmission_note   TEXT NULL
+3.6  audit_logs
+id              INT PRIMARY KEY AUTO_INCREMENT
+request_id      INT FK -> attendance_requests(id)
+action          ENUM(
+  'SUBMITTED','CANCELLED','RESUBMITTED',
+  'CLASS_COORD_APPROVED','YEAR_COORD_APPROVED',
+  'CHAIRPERSON_APPROVED','REJECTED','RESUBMISSION_REQUESTED'
+)
+performed_by    INT FK -> users(id)
+performed_as    VARCHAR(50)   -- e.g. 'SUBSTITUTE for Priya M.'
+note            TEXT NULL
+created_at      TIMESTAMP
+3.7  substitute_approvers
+id                  INT PRIMARY KEY AUTO_INCREMENT
+absent_user_id      INT FK -> users(id)
+substitute_user_id  INT FK -> users(id)
+role_covered        ENUM('CLASS_COORD','YEAR_COORD')
+active              BOOLEAN DEFAULT TRUE
+assigned_at         TIMESTAMP
+expires_at          TIMESTAMP
+4. Approval Flow
+4.1  OD & Medical Leave
+Step
+Who Acts
+Action
+1
+Student
+Submits request with letter + proof
+2
+Class Coordinator
+Approve / Reject / Request Resubmission
+3
+Year-wise Coordinator
+Approve / Reject / Request Resubmission
+End
+System
+Excel auto-updated. Request marked YEAR_COORD_APPROVED. Done.
+4.2  Special OD
+Step
+Who Acts
+Action
+1
+Student
+Submits request with letter + proof
+2
+Class Coordinator
+Approve / Reject / Request Resubmission
+3
+Year-wise Coordinator
+Approve / Reject / Request Resubmission
+4
+Chairperson
+Approve / Reject / Request Resubmission
+End
+System
+Excel auto-updated. Request marked CHAIRPERSON_APPROVED. Done.
+4.3  Resubmission
+When a request is Rejected or marked Resubmission Requested:
+The request goes back only to the person who rejected or requested resubmission.
+A new request is created and linked via parent_request_id.
+The old request is frozen — never deleted.
+Student can update reason and upload new proof/letter.
+The new request goes through the full workflow again from that level.
+4.4  Cancellation
+Allowed only when status = SUBMITTED.
+Once any coordinator has acted, cancellation is disabled.
+Record stays in the database — never deleted.
+Class Coordinator is notified so they do not act on it.
+5. Roles & Permissions (RBAC)
+Role
+Permissions
+STUDENT
+Submit request | View own requests + balance | Cancel (SUBMITTED only) | Resubmit (REJECTED / RESUBMISSION_REQUESTED only)
+CLASS_COORD
+Approve / Reject / Request Resubmission — own division only | View + download Excel sheet
+YEAR_COORD
+Approve / Reject / Request Resubmission — own year, all divisions | View + download Excel sheet
+CHAIRPERSON
+Approve / Reject / Request Resubmission — Special OD only, all sections | Read-only view of all Excel sheets
+ADMIN
+Full access | Manage users | Assign substitutes | Reset semester balances | View audit logs
+6. Letter System
+Each leave type has its own separate letter template. When submitting, the student chooses one of two paths:
+6.1  Option A — Type Digitally
+Blank template is shown on screen with the correct format for the selected leave type.
+Student fills in all fields directly in the browser.
+System auto-generates a PDF from the filled content on submission.
+PDF is attached to the request automatically — coordinators can view or download it.
+6.2  Option B — Write Physically
+Blank template is shown on screen for the student to copy the format by hand.
+Student can also download the blank template as a PDF to print.
+Student writes the letter on paper, takes a photo or scan.
+Uploads the image or scanned PDF (JPG / PNG / PDF accepted).
+6.3  Template Summary
+Leave Type
+Addressed To
+Key Fields
+Proof to Attach
+OD
+Class Coordinator
+Event name, organising body, role, dates
+Event invitation / Registration confirmation
+Medical Leave
+Class Coordinator
+Illness description, dates, medical supervision note
+Doctor certificate / Prescription / Discharge summary
+Special OD
+Chairperson (via Class Coord + Year Coord)
+College representation, event, venue, role
+Official selection letter from organising body
+7. Excel Sheet (Auto-Generated)
+The Excel sheet is automatically updated when a request reaches YEAR_COORD_APPROVED or CHAIRPERSON_APPROVED. No manual marking required — the approval itself triggers the update.
+7.1  Columns
+Column
+Description
+Student Name
+Full name from users table
+Register No. (UUID)
+Unique student identifier
+Leave Type
+OD / Medical / Special OD
+From Date
+Start date of absence
+To Date
+End date of absence
+Days
+Total days count
+Reason
+Reason submitted by student
+Subject 1...N
+Dynamic — one column per subject from student_subjects
+Subject Teacher 1...N
+Teacher name per subject
+Status
+Final approval status
+Approved By
+Name of final approver
+Approved At
+Timestamp of final approval
+7.2  Access
+Stored in Google Drive folder scoped per coordinator.
+Viewable as a rendered table inside the web application.
+Downloadable as .xlsx from the website.
+One file per division per semester — new approvals append a new row.
+Class Coordinator sees only their division. Year Coordinator sees their full year. Chairperson has read-only access to all.
+8. Substitute Approver System
+To prevent delays when a coordinator is absent, Admin can assign a substitute approver temporarily.
+Admin assigns a substitute via the admin panel for Class Coord or Year Coord roles only.
+Substitute gets temporary rights scoped to that exact role and expires_at timestamp.
+After expiry, access is automatically deactivated.
+Audit log records: Approved by [Substitute Name] on behalf of [Coordinator Name].
+No substitute for Chairperson — they are the singular authority for Special OD.
+9. Notifications (Email + In-App)
+Trigger
+Who Gets Notified
+Message
+Request submitted
+Class Coordinator
+New request from [Student Name]
+Class Coord approves
+Year Coordinator
+Request forwarded for your approval
+Year Coord approves (OD/Medical)
+Student
+Approved — attendance has been updated
+Year Coord approves (Special OD)
+Chairperson
+Special OD request needs your approval
+Chairperson approves
+Student
+Approved — attendance has been updated
+Rejected at any level
+Student
+Rejected by [Role]: [reason]
+Resubmission requested
+Student
+[Role] has requested changes: [note]
+Student resubmits
+Level who requested resubmission
+Student has resubmitted their request
+No action in 24 hours
+Current pending approver
+Reminder: You have a pending request
+Deadline approaching (Day 5)
+Student
+1 day left to submit for [absence dates]
+Request cancelled
+Class Coordinator
+Request cancelled by student
+10. Security & Constraints
+Rule
+Detail
+OD limit
+Max 5 days per student per semester — blocked at submission if exceeded
+Medical limit
+Max 5 days per student per semester — blocked at submission if exceeded
+Special OD
+Unlimited — no cap
+Submission deadline
+Must submit within 6 days of the first absence date
+File validation
+PDF / JPG / PNG only, max 2MB, magic bytes checked server-side
+JWT Auth
+Every protected route requires a valid token
+RBAC
+Role verified on every API route; coordinator scoped to own division/year
+Chairperson scope
+Can see all sections but only SPECIAL_OD requests
+Rate limiting
+Max 3 submissions per student per day
+SQL safety
+Parameterized queries / ORM only — no raw SQL
+11. UI Screens (Per Role)
+11.1  Student
+Submit form: leave type selector, date range picker, reason field, letter option (digital/physical), file upload.
+Live balance display: OD: 3/5 used this semester | Medical: 1/5 used.
+My Requests list with status badges and step-by-step tracker (like courier tracking).
+Cancel button — visible only when status is SUBMITTED.
+Resubmit button — visible only when REJECTED or RESUBMISSION_REQUESTED, shows reason from coordinator.
+11.2  Class Coordinator
+Pending approvals list — own division only.
+Approve / Reject / Request Resubmission buttons — reason mandatory for last two.
+View letter and proof inline before acting.
+Excel sheet — rendered table in-app + Download as .xlsx button.
+Substitute badge shown if acting as substitute for an absent coordinator.
+11.3  Year-wise Coordinator
+Pending approvals list — own year, all divisions.
+Approve / Reject / Request Resubmission — reason mandatory.
+View letter and proof inline.
+Excel sheet — rendered table in-app + Download button.
+11.4  Chairperson
+Special OD requests only — across all sections and years.
+Approve / Reject / Request Resubmission.
+Full read-only view of all divisions Excel sheets.
+11.5  Admin
+User management — create, edit, deactivate accounts.
+Assign substitute approvers with role and expiry.
+Reset semester leave balances.
+View full audit logs.
+12. Reports (Admin / Chairperson)
+OD and Medical balance usage per student — who is close to the 5-day limit.
+Requests pending more than 48 hours — flagged for attention.
+Approval rate per coordinator.
+Students with unusually high approvals — misuse alert.
+Most common rejection reasons.
+Special OD volume per event or month.
+13. Build Order
+Phase
+Priority
+What to Build
+Phase 1
+Critical
+DB schema + Auth + RBAC + Student submit flow + Class Coord approve/reject
+Phase 2
+Critical
+Year Coord flow + Excel auto-generation + Google Drive integration + leave balance enforcement
+Phase 3
+High
+Chairperson Special OD flow + deadline enforcement + letter system (digital + physical upload)
+Phase 4
+High
+Reject + Resubmit flow + Substitute approver system + Email and in-app notifications
+Phase 5
+Medium
+Student tracker UI + balance display + Admin dashboard + reports + rate limiting

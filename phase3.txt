@@ -1,0 +1,379 @@
+PHASE 3 — CORRECTED IMPLEMENTATION PLAN
+Chairperson Special OD Flow  ·  Deadline Enforcement  ·  Letter System
+Atria Institute of Technology
+Legend:    FIXED FROM PREVIOUS VERSION       NEW ADDITION       UNCHANGED  
+1. Schema Fix — Add resubmission_requested_by (CRITICAL — DO FIRST)
+This is the most important fix in Phase 3. The previous plan had no way to route a resubmitted request back to the correct approver level. This must be added to the schema BEFORE any controller code is written.
+Add this field to the attendance_requests table:
+-- Migration: add to attendance_requests
+ALTER TABLE attendance_requests
+  ADD COLUMN resubmission_requested_by
+  ENUM('CLASS_COORD', 'YEAR_COORD', 'CHAIRPERSON') NULL;
+Update the Prisma schema accordingly:
+model attendance_requests {
+  // ... existing fields ...
+  resubmission_requested_by  ResubmissionRole?   // NEW
+}
+enum ResubmissionRole {
+  CLASS_COORD
+  YEAR_COORD
+  CHAIRPERSON
+}
+How it is used — Resubmission routing logic:
+When any approver calls POST /request-resubmission/:id, store their role in resubmission_requested_by.
+When a student resubmits (creates a new request linked via parent_request_id), the system checks the parent's resubmission_requested_by.
+The new request's starting status is set based on that field:
+CLASS_COORD  →  new request starts at SUBMITTED  (goes to Class Coord first)
+YEAR_COORD   →  new request starts at CLASS_COORD_APPROVED  (skips Class Coord)
+CHAIRPERSON  →  new request starts at YEAR_COORD_APPROVED  (goes directly to Chairperson)
+// In resubmit controller (student resubmits):
+const parent = await prisma.attendance_requests.findUnique({
+  where: { id: parentRequestId }
+})
+const startingStatus = {
+  CLASS_COORD:  'SUBMITTED',
+  YEAR_COORD:   'CLASS_COORD_APPROVED',
+  CHAIRPERSON:  'YEAR_COORD_APPROVED'
+}[parent.resubmission_requested_by]
+await prisma.attendance_requests.create({
+  data: {
+    ...newRequestData,
+    status: startingStatus,
+    parent_request_id: parentRequestId
+  }
+})
+2. Deadline Enforcement — Corrected Logic
+CRITICAL clarification: The 6-day window starts from from_date (the first day of absence) — NOT from submitted_at. Verify this was stored correctly in Phase 1.
+Verify Phase 1 stored deadline_date correctly:
+// CORRECT — deadline is from_date + 6 days
+deadline_date: new Date(from_date.getTime() + 6 * 24 * 60 * 60 * 1000)
+// WRONG — do not use submitted_at
+// deadline_date: new Date(submitted_at.getTime() + 6 * 24 * 60 * 60 * 1000)  ← INCORRECT
+If Phase 1 used submitted_at, run this migration to recalculate all existing deadline_date values:
+UPDATE attendance_requests
+SET deadline_date = DATE_ADD(from_date, INTERVAL 6 DAY)
+WHERE deadline_date IS NOT NULL;
+Place 1 — Submission guard (verify exists in Phase 1 submit endpoint):
+// In request.controller.js — submit()
+const deadline = new Date(from_date)
+deadline.setDate(deadline.getDate() + 6)
+if (new Date() > deadline) {
+  return res.status(400).json({
+    error: 'Submission deadline has passed (6 days from absence date).'
+  })
+}
+Place 2 — Midnight cron job (auto-reject overdue SUBMITTED requests):
+File: backend/jobs/deadline.job.js
+const cron = require('node-cron')
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
+// Runs every day at midnight
+cron.schedule('0 0 * * *', async () => {
+  const overdue = await prisma.attendance_requests.findMany({
+    where: {
+      status: 'SUBMITTED',
+      deadline_date: { lt: new Date() }   // deadline_date = from_date + 6 days
+    }
+  })
+  for (const req of overdue) {
+    await prisma.attendance_requests.update({
+      where: { id: req.id },
+      data: {
+        status: 'REJECTED',
+        rejected_by: null,
+        rejection_reason: 'Auto-rejected: 6-day deadline from absence date exceeded.'
+      }
+    })
+    await prisma.audit_logs.create({
+      data: {
+        requestId: req.id,
+        action: 'REJECTED',
+        performedBy: null,
+        performedAs: 'SYSTEM',
+        note: 'Auto-rejected by deadline enforcement job (from_date + 6 days).'
+      }
+    })
+  }
+  console.log(`[CRON] Auto-rejected ${overdue.length} overdue requests.`)
+})
+Place 3 — Day 5 student warning (9AM daily cron):
+// Warns students 1 day before their deadline
+cron.schedule('0 9 * * *', async () => {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  tomorrow.setHours(0, 0, 0, 0)
+  const dayAfter = new Date(tomorrow)
+  dayAfter.setDate(dayAfter.getDate() + 1)
+  const approaching = await prisma.attendance_requests.findMany({
+    where: {
+      status: 'SUBMITTED',
+      deadline_date: { gte: tomorrow, lt: dayAfter }
+    },
+    include: { student: true }
+  })
+  for (const req of approaching) {
+    // Wire to notificationService in Phase 4
+    // notificationService.send(req.student, 'DEADLINE_WARNING', req)
+    console.log(`[REMINDER] Student ${req.student.name} — 1 day left on request ${req.id}`)
+  }
+})
+Register both jobs in server.js:
+require('./jobs/deadline.job')
+3. Chairperson Endpoints
+The Chairperson only ever sees SPECIAL_OD requests. Scope is ALL sections and ALL years but leave_type is strictly filtered.
+File: backend/controllers/chairperson.controller.js
+GET /pending — scoped to SPECIAL_OD + YEAR_COORD_APPROVED only:
+const getPending = async (req, res) => {
+  const requests = await prisma.attendance_requests.findMany({
+    where: {
+      status: 'YEAR_COORD_APPROVED',
+      leave_type: 'SPECIAL_OD'           // STRICT filter
+    },
+    include: { student: true }
+  })
+  res.json(requests)
+}
+POST /approve/:id — final approval, triggers Excel + Drive sync:
+const approve = async (req, res) => {
+  const request = await prisma.attendance_requests.update({
+    where: { id: Number(req.params.id) },
+    data: { status: 'CHAIRPERSON_APPROVED' }  // Terminal status for SPECIAL_OD
+  })
+  // No balance deduction — Special OD is unlimited
+  await excelService.appendRow(request)         // Same service built in Phase 2
+  await googleDriveService.sync(request)        // Same service built in Phase 2
+  await prisma.audit_logs.create({
+    data: { requestId: request.id, action: 'CHAIRPERSON_APPROVED',
+            performedBy: req.user.id, performedAs: 'CHAIRPERSON' }
+  })
+  // Notify student (Phase 4 notification service)
+  res.json({ message: 'Special OD approved. Records updated.' })
+}
+POST /reject/:id:
+const reject = async (req, res) => {
+  const { reason } = req.body
+  if (!reason) return res.status(400).json({ error: 'Rejection reason is mandatory.' })
+  await prisma.attendance_requests.update({
+    where: { id: Number(req.params.id) },
+    data: { status: 'REJECTED', rejected_by: 'CHAIRPERSON', rejection_reason: reason }
+  })
+  await prisma.audit_logs.create({
+    data: { requestId: Number(req.params.id), action: 'REJECTED',
+            performedBy: req.user.id, performedAs: 'CHAIRPERSON', note: reason }
+  })
+  res.json({ message: 'Request rejected.' })
+}
+POST /request-resubmission/:id — stores which level triggered it:
+const requestResubmission = async (req, res) => {
+  const { note } = req.body
+  if (!note) return res.status(400).json({ error: 'Resubmission note is mandatory.' })
+  await prisma.attendance_requests.update({
+    where: { id: Number(req.params.id) },
+    data: {
+      status: 'RESUBMISSION_REQUESTED',
+      resubmission_note: note,
+      resubmission_requested_by: 'CHAIRPERSON'   // NEW — critical for routing
+    }
+  })
+  await prisma.audit_logs.create({
+    data: { requestId: Number(req.params.id), action: 'RESUBMISSION_REQUESTED',
+            performedBy: req.user.id, performedAs: 'CHAIRPERSON', note }
+  })
+  res.json({ message: 'Resubmission requested.' })
+}
+File: backend/routes/chairperson.routes.js
+const express = require('express')
+const router = express.Router()
+const { authenticate, authorise } = require('../middleware/auth.middleware')
+const { getPending, approve, reject, requestResubmission } = require('../controllers/chairperson.controller')
+router.use(authenticate)
+router.use(authorise('CHAIRPERSON'))
+router.get('/pending', getPending)
+router.post('/approve/:id', approve)
+router.post('/reject/:id', reject)
+router.post('/request-resubmission/:id', requestResubmission)
+module.exports = router
+Register in server.js:
+const chairpersonRoutes = require('./routes/chairperson.routes')
+app.use('/chairperson', chairpersonRoutes)
+4. Letter System — Digital and Physical
+4.1  Answers to Open Questions
+Q1 — letter_content or standard template?
+Use the fixed template structure. The template headings, addressee, subject line, and sign-off are all fixed and non-editable. Only the student's reason field is injected dynamically into the body paragraph. Do not let the student freewrite the entire letter body.
+Q2 — Multer already in Phase 1?
+Yes. Multer was set up in Phase 1 for proof file uploads. Extend the same middleware to accept the physical letter upload under letter_type = 'PHYSICAL'. Do not rebuild it — just confirm the existing route accepts both the proof file and the letter scan as separate fields if needed.
+4.2  Option A — Digital Letter (PDF Auto-Generation)
+File: backend/services/letter.service.js
+College name is Atria Institute of Technology — not any other institution.
+const PDFDocument = require('pdfkit')
+const fs = require('fs')
+const path = require('path')
+const LETTER_DIR = path.resolve('./uploads/letters')
+if (!fs.existsSync(LETTER_DIR)) fs.mkdirSync(LETTER_DIR, { recursive: true })
+const SUBJECT_LINES = {
+  OD:         'Application for On-Duty (OD) Leave',
+  MEDICAL:    'Application for Medical Leave',
+  SPECIAL_OD: 'Application for Special On-Duty (Special OD) Leave'
+}
+const ADDRESSEES = {
+  OD:         'The Class Coordinator',
+  MEDICAL:    'The Class Coordinator',
+  SPECIAL_OD: 'The Chairperson'          // Via Class Coord & Year Coord
+}
+async function generateLetterPDF(request, student) {
+  return new Promise((resolve, reject) => {
+    const fileName = `letter_${request.id}_${Date.now()}.pdf`
+    const filePath = path.join(LETTER_DIR, fileName)
+    const doc = new PDFDocument({ margin: 72 })
+    const stream = fs.createWriteStream(filePath)
+    doc.pipe(stream)
+    // -- Fixed header (template) --
+    doc.fontSize(14).font('Helvetica-Bold')
+       .text('ATRIA INSTITUTE OF TECHNOLOGY', { align: 'center' })
+    doc.fontSize(11).font('Helvetica')
+       .text('Department of ' + student.department, { align: 'center' })
+    doc.moveDown()
+       .text('Bangalore', { align: 'center' })
+    doc.moveDown(2)
+    // -- Date (right-aligned) --
+    doc.text('Date: ' + new Date().toDateString(), { align: 'right' })
+    doc.moveDown()
+    // -- Addressee (fixed per leave type) --
+    const addressee = ADDRESSEES[request.leaveType]
+    doc.text('To,')
+    doc.text(addressee)
+    if (request.leaveType === 'SPECIAL_OD') {
+      doc.text('(Via: Class Coordinator & Year-wise Coordinator)')
+    }
+    doc.text('Atria Institute of Technology, Bangalore')
+    doc.moveDown()
+    // -- Subject (fixed per leave type) --
+    doc.font('Helvetica-Bold')
+       .text('Subject: ' + SUBJECT_LINES[request.leaveType])
+    doc.font('Helvetica').moveDown()
+    // -- Salutation --
+    doc.text('Respected Sir/Madam,').moveDown(0.5)
+    // -- Body (only reason is dynamic) --
+    doc.text(
+      `I, ${student.name}, Register No. ${student.registerNo || student.id}, ` +
+      `a student of ${student.department} (Year ${student.year}, Division ${student.division}), ` +
+      `humbly request your approval for leave from ` +
+      `${new Date(request.fromDate).toDateString()} to ${new Date(request.toDate).toDateString()} ` +
+      `(${request.daysCount} day(s)).`
+    )
+    doc.moveDown(0.5)
+    doc.text('Reason: ' + request.reason)   // Only dynamic part
+    doc.moveDown(0.5)
+    doc.text('I assure you that I will make up for any missed academic work at the earliest.')
+    doc.moveDown(2)
+    // -- Sign-off (fixed) --
+    doc.text('Yours sincerely,')
+    doc.moveDown(0.5)
+    doc.font('Helvetica-Bold').text(student.name)
+    doc.font('Helvetica')
+       .text('Register No: ' + (student.registerNo || student.id))
+       .text('Year ' + student.year + ' | Division ' + student.division)
+       .text('Department of ' + student.department)
+    doc.end()
+    stream.on('finish', () => resolve({ fileName, filePath }))
+    stream.on('error', reject)
+  })
+}
+module.exports = { generateLetterPDF }
+Hook into submit controller (request.controller.js):
+const { generateLetterPDF } = require('../services/letter.service')
+// After creating the request record:
+if (letter_type === 'DIGITAL') {
+  const { fileName } = await generateLetterPDF(newRequest, student)
+  await prisma.attendance_requests.update({
+    where: { id: newRequest.id },
+    data: { proof_file_url: `/uploads/letters/${fileName}`, letter_type: 'DIGITAL' }
+  })
+}
+4.3  Option B — Physical Letter (File Upload)
+The backend upload is already handled by Multer from Phase 1. No new backend code needed. However the following frontend work is required and must not be skipped:
+When student selects 'Write Physically', show the blank letter template on screen so they can copy the format by hand.
+Provide a 'Download Blank Template' button that downloads a pre-filled PDF with just the fixed fields (college name, addressee, subject line, sign-off) leaving the body blank for handwriting.
+The student then uploads their handwritten/scanned letter (JPG, PNG, or PDF — max 2MB) using the existing Multer upload field.
+Note: The blank template download is a separate PDF with only fixed fields pre-printed. Generate it once per leave type using the same letter.service.js — just omit the dynamic reason and student name fields.
+Serve uploaded files statically (add to server.js if not already present):
+app.use('/uploads', express.static(path.resolve('./uploads')))
+5. Phase 3 Complete Checklist
+Task
+Status
+Notes
+Schema: add resubmission_requested_by field
+FIXED — NEW
+Do this before writing any controller code
+Verify deadline_date = from_date + 6 (not submitted_at + 6)
+FIXED
+Run migration if Phase 1 used wrong base date
+Chairperson GET /pending
+Build
+SPECIAL_OD + YEAR_COORD_APPROVED only
+Chairperson POST /approve/:id
+Build
+Triggers Excel + Drive sync, no balance deduction
+Chairperson POST /reject/:id
+Build
+Stores rejected_by + reason, audit log
+Chairperson POST /request-resubmission/:id
+FIXED — stores resubmission_requested_by: CHAIRPERSON
+Critical for correct routing on resubmit
+Resubmit controller — uses parent resubmission_requested_by to set starting status
+FIXED — NEW
+Routes directly to Chairperson without restarting flow
+Midnight cron — auto-reject overdue SUBMITTED requests
+Build
+from_date + 6 days
+9AM cron — Day 5 warning log (Phase 4 will wire email)
+Build
+Placeholder — notification service comes in Phase 4
+letter.service.js — generateLetterPDF()
+Build
+Fixed template, only reason is dynamic. College = Atria Institute of Technology
+Submit controller — wire letter_type = DIGITAL to generateLetterPDF
+Build
+Submit controller — verify letter_type = PHYSICAL uses existing Multer
+Verify
+Do not rebuild Multer
+Frontend: blank template view on screen for physical option
+NEW
+Student copies format by hand
+Frontend: Download Blank Template PDF button
+NEW
+Pre-printed fixed fields, blank body
+Static file serving: /uploads via express.static
+Verify/Add
+Coordinators view letter and proof in browser
+6. Dependencies to Install
+npm i node-cron    # Cron job scheduling (deadline enforcement)
+npm i pdfkit       # PDF generation (digital letter)
+7. Recommended Build Order for Phase 3
+Follow this exact order — schema first, then backend, then frontend:
+Order
+Task
+Why This Order
+1
+Run schema migration — add resubmission_requested_by
+Everything else depends on this field
+2
+Verify / fix deadline_date base date in Phase 1 records
+Cron job is useless if the dates are wrong
+3
+Build deadline.job.js — both cron schedules
+Independent, no controller dependencies
+4
+Build letter.service.js
+Submit endpoint depends on this
+5
+Build chairperson.controller.js — all 4 endpoints
+Routes depend on controller
+6
+Build chairperson.routes.js + register in server.js
+7
+Update resubmit controller with parent-based status routing
+Needs schema field from step 1
+8
+Frontend — blank template view + download for physical option
+Last because backend is the dependency

@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {  
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  CLASS_COORD
+  YEAR_COORD
+  CHAIRPERSON
+  ADMIN
+}
+
+enum LeaveType {
+  OD
+  MEDICAL
+  SPECIAL_OD
+}
+
+enum RequestStatus {
+  SUBMITTED
+  CLASS_COORD_APPROVED
+  YEAR_COORD_APPROVED
+  CHAIRPERSON_APPROVED
+  REJECTED
+  RESUBMISSION_REQUESTED
+  CANCELLED
+}
+
+enum ProofFileType {
+  PDF
+  JPG
+  PNG
+}
+
+enum LetterType {
+  DIGITAL
+  PHYSICAL
+}
+
+enum ActionType {
+  SUBMITTED
+  CANCELLED
+  RESUBMITTED
+  CLASS_COORD_APPROVED
+  YEAR_COORD_APPROVED
+  CHAIRPERSON_APPROVED
+  REJECTED
+  RESUBMISSION_REQUESTED
+}
+
+enum RoleCovered {
+  CLASS_COORD
+  YEAR_COORD
+}
+
+enum ResubmissionRole {
+  CLASS_COORD
+  YEAR_COORD
+  CHAIRPERSON
+}
+
+model User {
+  id                   Int                   @id @default(autoincrement())
+  name                 String                @db.VarChar(100)
+  email                String                @unique @db.VarChar(100)
+  googleId             String?               @unique @map("google_id") @db.VarChar(100)
+  passwordHash         String?               @map("password_hash") @db.Text
+  role                 Role                  @default(STUDENT)
+  department           String                @db.VarChar(50)
+  year                 Int?
+  division             String?               @db.VarChar(10)
+  createdAt            DateTime              @default(now()) @map("created_at")
+
+  // Relationships
+  subjectsEnrolled     StudentSubject[]
+  leaveBalances        LeaveBalance[]
+  requests             AttendanceRequest[]   @relation("StudentRequests")
+  auditActions         AuditLog[]            @relation("AuditPerformedBy")
+  absentSubstitutes    SubstituteApprover[]  @relation("AbsentUser")
+  assignedSubstitutes  SubstituteApprover[]  @relation("SubstituteUser")
+  notifications        Notification[]
+
+  @@map("users")
+}
+
+model Subject {
+  id              Int                   @id @default(autoincrement())
+  name            String                @db.VarChar(100)
+  code            String                @db.VarChar(20)
+  department      String                @db.VarChar(50)
+  year            Int
+  
+  studentSubjects StudentSubject[]
+
+  @@map("subjects")
+}
+
+model StudentSubject {
+  id          Int      @id @default(autoincrement())
+  studentId   Int      @map("student_id")
+  subjectId   Int      @map("subject_id")
+  teacherName String   @map("teacher_name") @db.VarChar(100)
+
+  student     User     @relation(fields: [studentId], references: [id])
+  subject     Subject  @relation(fields: [subjectId], references: [id])
+
+  @@map("student_subjects")
+}
+
+model LeaveBalance {
+  id           Int      @id @default(autoincrement())
+  studentId    Int      @map("student_id")
+  semester     String   @db.VarChar(20)
+  odUsed       Int      @default(0) @map("od_used")
+  medicalUsed  Int      @default(0) @map("medical_used")
+
+  student      User     @relation(fields: [studentId], references: [id])
+
+  @@map("leave_balances")
+}
+
+model AttendanceRequest {
+  id               Int                   @id @default(autoincrement())
+  studentId        Int                   @map("student_id")
+  leaveType        LeaveType             @map("leave_type")
+  fromDate         DateTime              @map("from_date") @db.Date
+  toDate           DateTime              @map("to_date") @db.Date
+  daysCount        Int                   @map("days_count")
+  reason           String                @db.Text
+  letterContent    String?               @map("letter_content") @db.Text
+  letterType       LetterType            @map("letter_type")
+  proofFileUrl     String?               @map("proof_file_url") @db.VarChar(255)
+  proofFileType    ProofFileType?        @map("proof_file_type")
+  semester         String                @db.VarChar(20)
+  submittedAt      DateTime              @default(now()) @map("submitted_at")
+  deadlineDate     DateTime              @map("deadline_date") @db.Date
+  
+  parentRequestId  Int?                  @map("parent_request_id")
+  parentRequest    AttendanceRequest?    @relation("ParentRequest", fields: [parentRequestId], references: [id])
+  childRequests    AttendanceRequest[]   @relation("ParentRequest")
+
+  status                  RequestStatus         @default(SUBMITTED)
+  rejectedBy              Role?                 @map("rejected_by")
+  rejectionReason         String?               @map("rejection_reason") @db.Text
+  resubmissionNote        String?               @map("resubmission_note") @db.Text
+  resubmissionRequestedBy ResubmissionRole?     @map("resubmission_requested_by")
+
+  student          User                  @relation("StudentRequests", fields: [studentId], references: [id])
+  auditLogs        AuditLog[]            @relation("RequestAuditLogs")
+
+  @@map("attendance_requests")
+}
+
+model AuditLog {
+  id            Int                  @id @default(autoincrement())
+  requestId     Int                  @map("request_id")
+  action        ActionType
+  performedBy   Int?                 @map("performed_by")
+  performedAs   String?              @map("performed_as") @db.VarChar(50)
+  note          String?              @db.Text
+  createdAt     DateTime             @default(now()) @map("created_at")
+
+  request       AttendanceRequest    @relation("RequestAuditLogs", fields: [requestId], references: [id])
+  user          User?                @relation("AuditPerformedBy", fields: [performedBy], references: [id])
+
+  @@map("audit_logs")
+}
+
+model SubstituteApprover {
+  id                Int                  @id @default(autoincrement())
+  absentUserId      Int                  @map("absent_user_id")
+  substituteUserId  Int                  @map("substitute_user_id")
+  roleCovered       RoleCovered          @map("role_covered")
+  active            Boolean              @default(true)
+  assignedAt        DateTime             @default(now()) @map("assigned_at")
+  expiresAt         DateTime             @map("expires_at")
+
+  absentUser        User                 @relation("AbsentUser", fields: [absentUserId], references: [id])
+  substituteUser    User                 @relation("SubstituteUser", fields: [substituteUserId], references: [id])
+
+  @@map("substitute_approvers")
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  requestId   Int?     @map("request_id")
+  message     String   @db.Text
+  isRead      Boolean  @default(false) @map("is_read")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}

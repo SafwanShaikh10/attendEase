@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AttendEase — Student Information &amp; Requests</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400&amp;family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#333333", // Charcoal
+                        "secondary": "#5f6368",
+                        "accent": "#4a5d4e", // Sophisticated library green
+                        "background": "#fdfaf1", // Warm Ivory
+                        "surface": "#f5f2e8", // Slightly darker Ivory
+                        "text-primary": "#333333", // Charcoal
+                        "text-secondary": "#5a5a5a",
+                        "terminal-bg": "#1a1a1a",
+                        "terminal-green": "#4ade80",
+                        "terminal-blue": "#60a5fa"
+                    },
+                    fontFamily: {
+                        headline: ["'Merriweather'", "serif"],
+                        body: ["'Inter'", "sans-serif"],
+                        mono: ["'JetBrains Mono'", "monospace"],
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-[var(--background)] text-[var(--text-primary)] font-body antialiased selection:bg-primary selection:text-background;
+            }
+            h1, h2, h3, .serif-heading {
+                @apply font-headline;
+            }
+        }
+        .swiss-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2.5rem;
+        }
+        .overlap-text {
+            line-height: 0.9;
+            letter-spacing: -0.04em;
+        }
+        .divider-charcoal {
+            @apply border-primary/20;
+        }
+        .terminal-window {
+            background: #1a1a1a;
+            border-radius: 6px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            font-family: 'JetBrains Mono', monospace;
+            overflow: hidden;
+        }
+        .terminal-header {
+            background: #333;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+    </style>
+</head>
+<body class="bg-background text-primary">
+<section class="min-h-screen relative flex items-center pb-48 px-10 pt-24">
+<div class="w-full max-w-[1600px] mx-auto swiss-grid">
+<div class="col-span-12 lg:col-span-11">
+<p class="text-[10px] font-bold uppercase tracking-[0.6em] mb-16 border-l-[3px] border-primary pl-6" style="">Dayananda Sagar University</p>
+<h1 class="text-[clamp(4.5rem,14vw,14rem)] font-black overlap-text z-10 relative text-primary mt-12" style="">
+                    Leave<br/>Requests.
+                </h1>
+<div class="mt-12 swiss-grid">
+<div class="col-start-1 lg:col-start-6 col-span-12 lg:col-span-6">
+<h2 class="text-6xl md:text-8xl font-black mb-12 italic text-accent opacity-80" style="">Handled.</h2>
+<p class="text-xl md:text-2xl text-text-secondary max-w-xl leading-relaxed font-light mb-16 italic" style="">
+                            A structured, role-based system for managing OD, Medical, and Special OD requests — from submission to approval.
+                        </p>
+<div class="flex flex-wrap gap-12 border-t divider-charcoal pt-12">
+<a class="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em]" href="#portals" style="">
+<span class="w-12 h-[1.5px] bg-primary group-hover:w-20 transition-all"></span>
+                                Enter the System
+                            </a>
+<a class="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em]" href="#journey" style="">
+<span class="w-12 h-[1.5px] bg-primary group-hover:w-20 transition-all"></span>
+                                See How It Works
+                            </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-48 px-10 bg-primary" id="journey">
+<div class="max-w-[1400px] mx-auto">
+<div class="swiss-grid items-start">
+<div class="col-span-12 lg:col-span-4 mb-24 lg:mb-0">
+<h2 class="text-7xl font-black leading-tight mb-12 text-background" style="">How It<br/>Works</h2>
+<p class="text-background/60 text-[11px] border-l-2 border-background/40 pl-6 max-w-[240px] uppercase tracking-widest leading-loose font-bold" style="">Every request travels through a structured path.</p>
+</div>
+<div class="col-span-12 lg:col-start-6 lg:col-span-7">
+<div class="terminal-window">
+<div class="terminal-header">
+<div class="dot dot-red"></div>
+<div class="dot dot-yellow"></div>
+<div class="dot dot-green"></div>
+<span class="ml-4 text-[10px] uppercase tracking-widest text-background/40 font-mono" style="">workflow.sh — 80x24</span>
+</div>
+<div class="p-8 md:p-12 text-sm md:text-base leading-relaxed text-background/90 font-mono">
+<div class="mb-8">
+<span class="text-terminal-green" style="">attenEase@dsu:~$</span> <span class="text-background" style="">trace --request-flow</span>
+</div>
+<div class="space-y-6">
+<div class="flex flex-col md:flex-row gap-4 items-start">
+<div class="text-background/40 whitespace-nowrap" style="">STEP_01</div>
+<div>
+<div class="text-terminal-blue font-bold" style="">/user/submit</div>
+<div class="text-xs uppercase tracking-tighter opacity-60" style="">Student</div>
+<div class="mt-1 opacity-80 text-sm" style="">POST { reason, letter, proof_attachment }</div>
+</div>
+</div>
+<div class="pl-8 border-l border-background/10 py-2">
+<span class="text-background/20" style="">|</span>
+</div>
+<div class="flex flex-col md:flex-row gap-4 items-start">
+<div class="text-background/40 whitespace-nowrap" style="">STEP_02</div>
+<div>
+<div class="text-terminal-blue font-bold" style="">/coord/division/review</div>
+<div class="text-xs uppercase tracking-tighter opacity-60" style="">Class Coordinator</div>
+<div class="mt-1 opacity-80 text-sm" style="">Status: PENDING_VALIDATION</div>
+</div>
+</div>
+<div class="pl-8 border-l border-background/10 py-2">
+<span class="text-background/20" style="">|</span>
+</div>
+<div class="flex flex-col md:flex-row gap-4 items-start">
+<div class="text-background/40 whitespace-nowrap" style="">STEP_03</div>
+<div>
+<div class="text-terminal-blue font-bold" style="">/coord/year/final_approval</div>
+<div class="text-xs uppercase tracking-tighter opacity-60" style="">Year Coordinator</div>
+<div class="mt-1 opacity-80 text-sm" style="">Permission: OD &amp; MEDICAL AUTHORIZED</div>
+</div>
+</div>
+<div class="pl-8 border-l border-background/10 py-2">
+<span class="text-background/20" style="">|</span>
+</div>
+<div class="flex flex-col md:flex-row gap-4 items-start">
+<div class="text-background/40 whitespace-nowrap" style="">STEP_04</div>
+<div>
+<div class="text-terminal-blue font-bold" style="">/authority/chairperson/special_od</div>
+<div class="text-xs uppercase tracking-tighter opacity-60" style="">Chairperson</div>
+<div class="mt-1 opacity-80 text-sm" style="">Conditional: IF request_type == 'SPECIAL_OD'</div>
+</div>
+</div>
+<div class="pl-8 border-l border-background/10 py-2">
+<span class="text-background/20" style="">|</span>
+</div>
+<div class="flex flex-col md:flex-row gap-4 items-start">
+<div class="text-background/40 whitespace-nowrap" style="">STEP_05</div>
+<div>
+<div class="text-terminal-green font-bold" style="">/system/db/commit</div>
+<div class="text-xs uppercase tracking-tighter opacity-60" style="">Approved</div>
+<div class="mt-1 opacity-80 text-sm" style="">RUN: sync_excel.py &amp; notify_student.sh</div>
+</div>
+</div>
+</div>
+<div class="mt-12 flex items-center gap-2">
+<span class="text-terminal-green" style="">attendEase@dsu:~$</span>
+<span class="w-2 h-5 bg-background/80 animate-pulse"></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-48 px-10" id="portals">
+<div class="max-w-[1400px] mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-end mb-32 border-b divider-charcoal pb-12">
+<h2 class="text-6xl md:text-8xl font-black uppercase tracking-tighter" style="">Portals</h2>
+<p class="text-right max-w-[260px] text-[10px] uppercase tracking-[0.2em] font-bold text-text-secondary pb-4 leading-relaxed" style="">Each role has a dedicated experience designed for efficiency and clarity.</p>
+</div>
+<div class="divide-y divider-charcoal">
+<div class="grid grid-cols-12 py-16 group hover:bg-primary/5 cursor-pointer px-6 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:z-10 bg-background">
+<div class="col-span-1 text-xl font-headline italic opacity-30" style="">01</div>
+<div class="col-span-4 text-3xl md:text-5xl font-headline font-black" style="">Student</div>
+<div class="col-span-5 hidden md:flex items-center gap-10">
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Submit &amp; Track</span>
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Upload Proofs</span>
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Balance Check</span>
+</div>
+<div class="col-span-7 md:col-span-2 flex justify-end items-center">
+<span class="material-symbols-outlined text-3xl opacity-20 group-hover:opacity-100 transition-opacity" style="">arrow_outward</span>
+</div>
+</div>
+<div class="grid grid-cols-12 py-16 group hover:bg-primary/5 cursor-pointer px-6 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:z-10 bg-background">
+<div class="col-span-1 text-xl font-headline italic opacity-30" style="">02</div>
+<div class="col-span-4 text-3xl md:text-5xl font-headline font-black" style="">Class Coord.</div>
+<div class="col-span-5 hidden md:flex items-center gap-10">
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Review &amp; Approve</span>
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Export Excel</span>
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">24h Reminders</span>
+</div>
+<div class="col-span-7 md:col-span-2 flex justify-end items-center">
+<span class="material-symbols-outlined text-3xl opacity-20 group-hover:opacity-100 transition-opacity" style="">arrow_outward</span>
+</div>
+</div>
+<div class="grid grid-cols-12 py-16 group hover:bg-primary/5 cursor-pointer px-6 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:z-10 bg-background">
+<div class="col-span-1 text-xl font-headline italic opacity-30" style="">03</div>
+<div class="col-span-4 text-3xl md:text-5xl font-headline font-black" style="">Year Coord.</div>
+<div class="col-span-5 hidden md:flex items-center gap-10">
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Final OD/Med Approver</span>
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Review All Divisions</span>
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Task Delegation</span>
+</div>
+<div class="col-span-7 md:col-span-2 flex justify-end items-center">
+<span class="material-symbols-outlined text-3xl opacity-20 group-hover:opacity-100 transition-opacity" style="">arrow_outward</span>
+</div>
+</div>
+<div class="grid grid-cols-12 py-16 group hover:bg-primary/5 cursor-pointer px-6 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:z-10 bg-background">
+<div class="col-span-1 text-xl font-headline italic opacity-30" style="">04</div>
+<div class="col-span-4 text-3xl md:text-5xl font-headline font-black" style="">Chairperson</div>
+<div class="col-span-5 hidden md:flex items-center gap-10">
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Special OD Authority</span>
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Audit Trail Access</span>
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Read-only Records</span>
+</div>
+<div class="col-span-7 md:col-span-2 flex justify-end items-center">
+<span class="material-symbols-outlined text-3xl opacity-20 group-hover:opacity-100 transition-opacity" style="">arrow_outward</span>
+</div>
+</div>
+<div class="grid grid-cols-12 py-16 group hover:bg-primary/5 cursor-pointer px-6 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] hover:shadow-2xl hover:z-10 bg-background">
+<div class="col-span-1 text-xl font-headline italic opacity-30" style="">05</div>
+<div class="col-span-4 text-3xl md:text-5xl font-headline font-black" style="">Admin</div>
+<div class="col-span-5 hidden md:flex items-center gap-10">
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">System Governance</span>
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Analytics Dashboard</span>
+<span class="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60" style="">Role Management</span>
+</div>
+<div class="col-span-7 md:col-span-2 flex justify-end items-center">
+<span class="material-symbols-outlined text-3xl opacity-20 group-hover:opacity-100 transition-opacity" style="">arrow_outward</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-48 px-10 bg-primary text-background overflow-hidden" id="about">
+<div class="max-w-[1400px] mx-auto swiss-grid">
+<div class="col-span-12 lg:col-span-7">
+<h2 class="text-6xl md:text-[9rem] font-black leading-[0.9] mb-24 tracking-tighter" style="">Beyond Manual.</h2>
+<div class="grid grid-cols-12 gap-8">
+<div class="col-span-12 md:col-span-10">
+<p class="text-2xl md:text-4xl font-light leading-relaxed mb-16 italic opacity-90" style="">
+                            AttendEase is a production-grade enterprise application designed to replace archaic paper-based and manual email threads.
+                        </p>
+<div class="flex flex-wrap gap-x-10 gap-y-6 opacity-40 border-t border-background/20 pt-10">
+<span class="text-[9px] uppercase font-bold tracking-[0.3em]" style="">React 18</span>
+<span class="text-[9px] uppercase font-bold tracking-[0.3em]" style="">Node.js</span>
+<span class="text-[9px] uppercase font-bold tracking-[0.3em]" style="">MySQL</span>
+<span class="text-[9px] uppercase font-bold tracking-[0.3em]" style="">Prisma</span>
+<span class="text-[9px] uppercase font-bold tracking-[0.3em]" style="">Express</span>
+<span class="text-[9px] uppercase font-bold tracking-[0.3em]" style="">Google Drive API</span>
+<span class="text-[9px] uppercase font-bold tracking-[0.3em]" style="">PDFKit</span>
+<span class="text-[9px] uppercase font-bold tracking-[0.3em]" style="">Nodemailer</span>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-5 flex flex-col justify-end mt-24 lg:mt-0">
+<div class="aspect-[4/5] bg-background text-primary p-12 relative flex flex-col justify-between shadow-2xl">
+<div class="w-32 h-32 bg-surface mb-8 overflow-hidden sepia-[0.3] grayscale hover:grayscale-0 transition-all duration-700">
+<img alt="Lead Architect" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3apIXn4w3wbncKpYPCnoJdgttwNWBIJE5utk2PBwf0q4BlKFS6nPrx5m7p20mjYyUzs41ZPf8d_nXWZ2u2cDMHbIPI4-Zvqr0etsmBjYtHZ_ikkeTqlAgmZykENRj1xthjL9r70dE5Q7dOQrFoaderulzdVeg73uSzVgVvSdeqbvdyoSno00Qp3DrNjkyfQ0fc5P7hTe-baOjtzGK7D4glkPqG08-wEKxRNd7cSDI0wx5mH0jCVk3NJ84ZG1TqdK_gwUGLwQ3uxE" style=""/>
+</div>
+<div class="space-y-5">
+<h4 class="text-4xl font-headline font-black" style="">Safwan M Shaikh</h4>
+<p class="text-[10px] uppercase tracking-[0.2em] font-bold text-accent" style="">Department of Artificial Intelligence And Machine Learning</p>
+<p class="text-[11px] text-text-secondary leading-loose italic" style="">Class of 2027 • Dayananda Sagar University</p>
+<div class="flex gap-8 pt-2">
+<a class="text-[9px] font-black tracking-widest uppercase hover:text-accent transition-colors" href="https://github.com/SafwanShaikh10" style="">GITHUB</a>
+<a class="text-[9px] font-black tracking-widest uppercase hover:text-accent transition-colors" href="https://www.linkedin.com/in/safwan-shaikh-dsu/" style="">LINKEDIN</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<footer class="bg-background border-t divider-charcoal py-24 px-10">
+<div class="max-w-[1400px] mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-start gap-12">
+<div class="space-y-6">
+<p class="text-4xl font-headline font-black tracking-tighter text-primary" style="">AttendEase</p>
+<p class="text-[10px] uppercase tracking-[0.4em] font-bold text-text-secondary" style="">Student Information &amp; Requests</p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-20">
+<div class="space-y-6">
+<p class="text-[9px] font-black uppercase tracking-[0.3em] text-accent" style="">System</p>
+<ul class="text-[10px] space-y-4 uppercase tracking-[0.2em] font-bold">
+<li class="" style=""><a class="hover:italic transition-all" href="#" style="">Process</a></li>
+<li class="" style=""><a class="hover:italic transition-all" href="#" style="">Roles</a></li>
+<li class="" style=""><a class="hover:italic transition-all" href="#" style="">About</a></li>
+</ul>
+</div>
+<div class="space-y-6">
+<p class="text-[9px] font-black uppercase tracking-[0.3em] text-accent" style="">Legal</p>
+<ul class="text-[10px] space-y-4 uppercase tracking-[0.2em] font-bold">
+<li class="" style=""><a class="hover:italic transition-all" href="#" style="">Privacy</a></li>
+<li class="" style=""><a class="hover:italic transition-all" href="#" style="">Terms</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="mt-24 pt-12 border-t divider-charcoal flex flex-col md:flex-row justify-between items-center text-[9px] uppercase tracking-[0.3em] font-bold text-text-secondary opacity-60">
+<p class="" style="">© 2025 Dayananda Sagar University</p>
+<p class="" style="">Built with care for DSU students</p>
+</div>
+</div>
+</footer>
+</body></html>
