@@ -1,21 +1,22 @@
-# AttendEase: Smart Attendance Request System
+# AttendEase: Redefining Campus Attendance Management
 
 > UNDER DEVELOPMENT: This project is currently a work in progress. Features, APIs, and the database schema are subject to change without notice.
 
-AttendEase is a comprehensive, multi-tier web application designed to streamline the process of submitting, reviewing, and approving student attendance exception requests (such as Medical Leave, Special OD, and regular On-Duty requests).
+Paper-based leave requests and manual tracking are things of the past. AttendEase provides a modern, high-performance solution for students and faculty to manage attendance exceptions with total transparency and security.
 
-## Features
-- Role-Based Access Control: Secure dashboards for Students, Class Coordinators, Year Coordinators, and Chairpersons.
-- Secure Document Management: All uploaded proofs and dynamically generated PDF letters are stored securely on the server and accessed via authenticated, short-lived tokens.
-- Real-Time Leave Balances: Automatic calculation of used vs. available leaves based on historical data.
-- Automated Deadlines: CRON-job driven deadline enforcement preventing late submissions.
-- Dynamic Notifications: In-app bell notifications and email alerts for status changes.
+## The Mission
+AttendEase was built to eliminate the stress of bureaucratic paperwork. Whether you are a student submitting a medical leave or a chairperson reviewing complex Special OD requests, the platform ensures that every action is logged, secure, and easy to perform.
 
-## Tech Stack
-- Frontend: React (Vite), TailwindCSS, Lucide Icons, Axios.
-- Backend: Node.js, Express.js, Prisma ORM.
-- Database: PostgreSQL (or configurable via Prisma).
-- Security: JWT Authentication, bcrypt password hashing, express-rate-limit, express-validator.
+## Key Highlights
+- Unified Dashboard Experience: Each user role—from Student to Chairperson—gets a tailored view of what matters most to them.
+- Secure Document Vault: All sensitive proofs are served through authenticated, encrypted pathways, keeping personal data private.
+- Smart Logic: The system automatically calculates leave balances and enforces strict submission deadlines, so you never have to guess your status.
+- Instant Connectivity: Integrated notifications keep everyone in the loop as requests move through the approval chain.
+
+## Technology Architecture
+- Modern Frontend: Built with React and Vite for a lightning-fast user interface.
+- Robust Backend: Powered by Node.js and Prisma, ensuring reliable data management and scalability.
+- Production-Grade Security: Implements JWT-based authentication and comprehensive input validation to protect every endpoint.
 
 ## Local Development Setup
 
