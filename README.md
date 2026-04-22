@@ -1,48 +1,17 @@
-# AttendEase: Smart Attendance Request System
+# AttendEase: Redefining Campus Attendance Management
 
-> **UNDER DEVELOPMENT**: This project is currently a work in progress. Features, APIs, and the database schema are subject to change without notice.
+Paper-based leave requests and manual tracking are things of the past. AttendEase provides a modern, high-performance solution for students and faculty to manage attendance exceptions with total transparency and security.
 
-AttendEase is a comprehensive, multi-tier web application designed to streamline the process of submitting, reviewing, and approving student attendance exception requests (such as Medical Leave, Special OD, and regular On-Duty requests).
+## The Mission
+AttendEase was built to eliminate the stress of bureaucratic paperwork. Whether you are a student submitting a medical leave or a chairperson reviewing complex Special OD requests, the platform ensures that every action is logged, secure, and easy to perform.
 
-##  Features
-- **Role-Based Access Control**: Secure dashboards for Students, Class Coordinators, Year Coordinators, and Chairpersons.
-- **Secure Document Management**: All uploaded proofs and dynamically generated PDF letters are stored securely on the server and accessed via authenticated, short-lived tokens.
-- **Real-Time Leave Balances**: Automatic calculation of used vs. available leaves based on historical data.
-- **Automated Deadlines**: CRON-job driven deadline enforcement preventing late submissions.
-- **Dynamic Notifications**: In-app bell notifications and email alerts for status changes.
+## Key Highlights
+- Unified Dashboard Experience: Each user roleâ€”from Student to Chairpersonâ€”gets a tailored view of what matters most to them.
+- Secure Document Vault: All sensitive proofs are served through authenticated, encrypted pathways, keeping personal data private.
+- Smart Logic: The system automatically calculates leave balances and enforces strict submission deadlines, so you never have to guess your status.
+- Instant Connectivity: Integrated notifications keep everyone in the loop as requests move through the approval chain.
 
-##  Tech Stack
-- **Frontend**: React (Vite), TailwindCSS, Lucide Icons, Axios.
-- **Backend**: Node.js, Express.js, Prisma ORM.
-- **Database**: PostgreSQL (or configurable via Prisma).
-- **Security**: JWT Authentication, bcrypt password hashing, express-rate-limit, express-validator.
-
-##  Local Development Setup
-
-### Prerequisites
-- Node.js (v16+)
-- A SQL Database (PostgreSQL recommended)
-
-### 1. Backend Setup
-```bash
-cd backend
-npm install
-```
-Configure your environment variables by copying the example file:
-```bash
-cp .env.example .env
-```
-Update `.env` with your database URL and secrets. Then push the schema:
-```bash
-npx prisma db push
-npm start
-```
-
-### 2. Frontend Setup
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-The application will be available at `http://localhost:5173`.
+## Technology Architecture
+- Modern Frontend: Built with React and Vite for a lightning-fast user interface.
+- Robust Backend: Powered by Node.js and Prisma, ensuring reliable data management and scalability.
+- Production-Grade Security: Implements JWT-based authentication and comprehensive input validation to protect every endpoint.
