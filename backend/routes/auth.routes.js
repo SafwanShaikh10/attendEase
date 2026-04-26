@@ -12,9 +12,17 @@ router.post('/reset-password', authController.resetPassword);
 // Google OAuth
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));
 
-router.get('/google/callback', 
-  passport.authenticate('google', { failureRedirect: '/login', session: false }),
-  authController.googleAuthCallback
-);
+router.get('/google/callback', (req, res, next) => {
+  passport.authenticate('google', { session: false }, (err, user, info) => {
+    if (err) {
+      return res.redirect(`${process.env.FRONTEND_URL}/login?error=${encodeURIComponent(err.message)}`);
+    }
+    if (!user) {
+      return res.redirect(`${process.env.FRONTEND_URL}/login?error=Authentication failed`);
+    }
+    req.user = user;
+    next();
+  })(req, res, next);
+}, authController.googleAuthCallback);
 
 module.exports = router;

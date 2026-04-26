@@ -134,6 +134,12 @@ const forgotPassword = async (req, res) => {
       return res.status(400).json({ error: 'Email is required' });
     }
 
+    // Pattern enforcement for engineering emails
+    const pattern = /^eng[a-zA-Z0-9]*@dsu\.edu\.in$/i;
+    if (!pattern.test(email)) {
+      return res.status(400).json({ error: 'Only engineering student emails (eng... @dsu.edu.in) are permitted.' });
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
     // Always return success to prevent email enumeration
     if (!user) {

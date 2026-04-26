@@ -36,17 +36,21 @@ passport.use(new GoogleStrategy({
 
       // 3. If still not found, create new user
       if (!user) {
-        // For new students via Google, we might need department/year/etc.
-        // For now, we create a skeleton and they might need to update details later
-        // or we restrict registration to pre-existing emails.
-        // Option: Only allow pre-registered emails? 
-        // Decision: Create skeleton user as STUDENT, they can fill details in profile.
+        // Enforce Email Format Policies
+        const lowerEmail = email.toLowerCase();
+        const isStudent = lowerEmail.startsWith('eng') && lowerEmail.endsWith('@dsu.edu.in');
+        const isStaff = lowerEmail.includes('-') && lowerEmail.endsWith('@dsu.edu.in');
+
+        if (!isStudent && !isStaff) {
+          return done(new Error('Unauthorized email format. Please use your official DSU email.'), null);
+        }
+
         user = await prisma.user.create({
           data: {
             email,
             name,
             googleId,
-            role: 'STUDENT',
+            role: isStudent ? 'STUDENT' : 'CLASS_COORD', // Default to student if matching eng, else coord
             department: 'Pending', // Placeholder
             passwordHash: null // Social users don't have local password initially
           }
