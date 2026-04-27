@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1e293b;
-  --color-secondary: #475569;
-  --color-accent: #2c4a63;
-  --color-background: #fdfbf7;
-  --color-surface: #f8f5ef;
-  --color-text-primary: #1e293b;
-  --color-text-secondary: #64748b;
+  --color-primary: #0f1e3f;
+  --color-secondary: #997953;
+  --color-accent: #cdaa80;
+  --color-background: #fbf9f4;
+  --color-surface: #f2eee4;
+  --color-text-primary: #0f1e3f;
+  --color-text-secondary: #997953;
   --font-headline: "Crimson Pro", serif;
   --font-body: "Inter", sans-serif;
 
@@ -27,6 +27,26 @@
   .reveal-item {
     opacity: 0;
     animation: reveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+
+  .reveal-node {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-node.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .nav-reveal {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  .nav-reveal.active {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

@@ -14,15 +14,39 @@ const StudentLogin = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const pattern = /^eng.*@dsu\.edu\.in$/i;
+    const pattern = /^eng[a-zA-Z0-9]*@dsu\.edu\.in$/i;
     if (!pattern.test(email)) {
       setError('Please use a valid engineering email (eng... @dsu.edu.in)');
       return;
     }
     setError('');
-    // Proceed with login logic
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Handle successful login (e.g., store token, redirect)
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(data.data.user));
+        // Redirect logic would go here, e.g., window.location.href = '/student/dashboard';
+        console.log('Login successful:', data);
+        alert('Login Successful! (Redirecting to dashboard...)');
+      } else {
+        setError(data.error || 'Authentication failed');
+      }
+    } catch (err) {
+      setError('Network error. Is the backend running?');
+    }
   };
 
   return (
