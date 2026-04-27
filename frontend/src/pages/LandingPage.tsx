@@ -178,7 +178,7 @@ const LandingPage = () => {
             <p className="text-right max-w-[280px] text-[10px] uppercase tracking-[0.2em] font-bold text-secondary pb-4 leading-relaxed">Dedicated interfaces optimized for administrative precision and user convenience.</p>
           </div>
           <div className="divide-y divider-slate">
-            <Link to="/student/login" className="grid grid-cols-12 py-16 group hover:bg-white hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-500 cursor-pointer px-6 reveal-node block relative z-10 will-change-transform" style={{ transitionDelay: '100ms' }}>
+            <Link to="/student/login" className="grid grid-cols-12 py-16 group portal-hover transition-all cursor-pointer px-6 reveal-node block relative z-10" style={{ transitionDelay: '100ms' }}>
               <div className="col-span-1 text-xl font-headline italic opacity-30 text-primary">01</div>
               <div className="col-span-4 text-3xl md:text-5xl font-headline font-bold text-primary">Student</div>
               <div className="col-span-5 hidden md:flex items-center gap-10">
@@ -190,7 +190,7 @@ const LandingPage = () => {
                 <span className="material-symbols-outlined text-3xl opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all text-secondary">arrow_outward</span>
               </div>
             </Link>
-            <Link to="/coordinator/login" className="grid grid-cols-12 py-16 group hover:bg-white hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-500 cursor-pointer px-6 reveal-node block relative z-10 will-change-transform" style={{ transitionDelay: '200ms' }}>
+            <Link to="/coordinator/login" className="grid grid-cols-12 py-16 group portal-hover transition-all cursor-pointer px-6 reveal-node block relative z-10" style={{ transitionDelay: '200ms' }}>
               <div className="col-span-1 text-xl font-headline italic opacity-30 text-primary">02</div>
               <div className="col-span-4 text-3xl md:text-5xl font-headline font-bold text-primary">Coordinator</div>
               <div className="col-span-5 hidden md:flex items-center gap-10">
@@ -202,7 +202,7 @@ const LandingPage = () => {
                 <span className="material-symbols-outlined text-3xl opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all text-secondary">arrow_outward</span>
               </div>
             </Link>
-            <Link to="/year-coordinator/login" className="grid grid-cols-12 py-16 group hover:bg-white hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-500 cursor-pointer px-6 reveal-node block relative z-10 will-change-transform" style={{ transitionDelay: '300ms' }}>
+            <Link to="/year-coordinator/login" className="grid grid-cols-12 py-16 group portal-hover transition-all cursor-pointer px-6 reveal-node block relative z-10" style={{ transitionDelay: '300ms' }}>
               <div className="col-span-1 text-xl font-headline italic opacity-30 text-primary">03</div>
               <div className="col-span-4 text-3xl md:text-5xl font-headline font-bold text-primary">Year Head</div>
               <div className="col-span-5 hidden md:flex items-center gap-10">
@@ -214,7 +214,7 @@ const LandingPage = () => {
                 <span className="material-symbols-outlined text-3xl opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all text-secondary">arrow_outward</span>
               </div>
             </Link>
-            <Link to="/chairperson/login" className="grid grid-cols-12 py-16 group hover:bg-white hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-500 cursor-pointer px-6 reveal-node block relative z-10 will-change-transform" style={{ transitionDelay: '400ms' }}>
+            <Link to="/chairperson/login" className="grid grid-cols-12 py-16 group portal-hover transition-all cursor-pointer px-6 reveal-node block relative z-10" style={{ transitionDelay: '400ms' }}>
               <div className="col-span-1 text-xl font-headline italic opacity-30 text-primary">04</div>
               <div className="col-span-4 text-3xl md:text-5xl font-headline font-bold text-primary">Chairperson</div>
               <div className="col-span-5 hidden md:flex items-center gap-10">
@@ -226,7 +226,7 @@ const LandingPage = () => {
                 <span className="material-symbols-outlined text-3xl opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all text-secondary">arrow_outward</span>
               </div>
             </Link>
-            <Link to="/admin/login" className="grid grid-cols-12 py-16 group hover:bg-white hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)] transition-all duration-500 cursor-pointer px-6 reveal-node block relative z-10 will-change-transform" style={{ transitionDelay: '500ms' }}>
+            <Link to="/admin/login" className="grid grid-cols-12 py-16 group portal-hover transition-all cursor-pointer px-6 reveal-node block relative z-10" style={{ transitionDelay: '500ms' }}>
               <div className="col-span-1 text-xl font-headline italic opacity-30 text-primary">05</div>
               <div className="col-span-4 text-3xl md:text-5xl font-headline font-bold text-primary">Administrator</div>
               <div className="col-span-5 hidden md:flex items-center gap-10">
