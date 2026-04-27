@@ -48,7 +48,7 @@ const ForgotPassword = () => {
     <div className="min-h-screen bg-background text-primary font-body flex flex-col">
       {/* Header */}
       <nav className="p-10 flex justify-between items-start z-50">
-        <Link to="/" className="text-3xl font-headline italic font-bold tracking-tighter text-primary hover:opacity-70 transition-opacity">
+        <Link to="/" className="text-3xl font-brand italic font-bold tracking-tighter text-primary hover:opacity-70 transition-opacity">
           AttendEase
         </Link>
         <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-text-secondary border-l-[3px] border-primary pl-6 py-1">

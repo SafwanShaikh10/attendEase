@@ -1,15 +1,65 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0f1e3f;
-  --color-secondary: #997953;
+  --color-primary: #00061c;
+  --color-secondary: #48607e;
   --color-accent: #cdaa80;
-  --color-background: #fbf9f4;
-  --color-surface: #f2eee4;
-  --color-text-primary: #0f1e3f;
-  --color-text-secondary: #997953;
+  --color-background: #fbf8fc;
+  --color-surface: #fbf8fc;
+  --color-on-surface: #1b1b1e;
+  --color-on-surface-variant: #45464e;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #0f1e3f;
+  --color-on-primary-container: #7986ad;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f5f3f6;
+  --color-surface-container: #efedf0;
+  --color-surface-container-high: #eae7eb;
+  --color-surface-container-highest: #e4e2e5;
+  --color-outline: #75777f;
+  --color-outline-variant: #c5c6cf;
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-text-primary: #00061c;
+  --color-text-secondary: #48607e;
+  --font-brand: "Playfair Display", serif;
   --font-headline: "Crimson Pro", serif;
   --font-body: "Inter", sans-serif;
+
+  --font-headline-md: "Newsreader", serif;
+  --font-headline-lg: "Newsreader", serif;
+  --font-display-lg: "Newsreader", serif;
+  --font-label-md: "Inter", sans-serif;
+  --font-label-lg: "Inter", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-caption: "Inter", sans-serif;
+
+  --font-size-display-lg: 48px;
+  --font-size-headline-lg: 32px;
+  --font-size-headline-md: 22px;
+  --font-size-body-lg: 18px;
+  --font-size-body-md: 15px;
+  --font-size-label-lg: 13px;
+  --font-size-label-md: 11px;
+  --font-size-caption: 10px;
+
+  --spacing-xs: 6px;
+  --spacing-sm: 12px;
+  --spacing-md: 20px;
+  --spacing-lg: 32px;
+  --spacing-xl: 48px;
+  --spacing-gutter: 20px;
+  --spacing-margin: 24px;
+
+  --max-width-xs: 18rem;
+  --max-width-sm: 22rem;
+  --max-width-md: 26rem;
+  --max-width-lg: 30rem;
+  --max-width-xl: 34rem;
+  --max-width-2xl: 40rem;
+  --max-width-container-max: 1200px;
 
   @keyframes reveal {
     from {
@@ -130,3 +180,4 @@
   opacity: 0.03;
   white-space: nowrap;
 }
+

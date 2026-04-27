@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const RoleLogin = () => {
   const [email, setEmail] = useState('');
@@ -8,11 +8,12 @@ const RoleLogin = () => {
   const [error, setError] = useState('');
   const [isHovered, setIsHovered] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const getRoleInfo = () => {
     const path = location.pathname;
-    if (path.includes('coordinator')) return { name: 'Class Coordinator', theme: 'accent' };
-    if (path.includes('year-coordinator')) return { name: 'Year-wise Coordinator', theme: 'primary' };
+    if (path.includes('coordinator') && !path.includes('year')) return { name: 'Class Coordinator', theme: 'accent' };
+    if (path.includes('year-coordinator')) return { name: 'Year-Wise Coordinator', theme: 'primary' };
     if (path.includes('chairperson')) return { name: 'Chairperson', theme: 'primary' };
     if (path.includes('admin')) return { name: 'Administrator', theme: 'accent' };
     return { name: 'Student', theme: 'primary' };
@@ -42,12 +43,16 @@ const RoleLogin = () => {
       if (response.ok) {
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('user', JSON.stringify(data.data.user));
-        // Verify role match
-        if (data.data.user.role.toLowerCase() !== role.name.replace(/ /g, '_').toLowerCase() && role.name !== 'Student') {
-          // Warning: In a real system, you'd enforce this on the backend
-          console.warn('Role mismatch detected');
-        }
-        alert(`Login Successful as ${data.data.user.role}!`);
+        
+        // Map login path to dashboard path
+        const path = location.pathname;
+        let redirectRole = 'coordinator';
+        if (path.includes('coordinator') && !path.includes('year')) redirectRole = 'coordinator';
+        if (path.includes('year-coordinator')) redirectRole = 'year-coordinator';
+        if (path.includes('chairperson')) redirectRole = 'chairperson';
+        if (path.includes('admin')) redirectRole = 'admin';
+        
+        navigate(`/${redirectRole}/dashboard`);
       } else {
         setError(data.error || 'Authentication failed');
       }
@@ -61,7 +66,7 @@ const RoleLogin = () => {
       {/* Left Panel - Aesthetic Branding */}
       <div className="hidden md:flex md:w-1/2 bg-surface p-12 flex-col justify-between relative overflow-hidden border-r divider-slate">
         <div className="reveal-item" style={{ animationDelay: '200ms' }}>
-          <Link to="/" className="text-2xl font-headline italic font-bold tracking-tighter text-primary">AttendEase</Link>
+          <Link to="/" className="text-2xl font-brand italic font-bold tracking-tighter text-primary">AttendEase</Link>
           <div className="mt-32">
             <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-accent mb-4">Role-Based Access</p>
             <h1 className="text-7xl font-bold tracking-tighter leading-none mb-8">
@@ -90,7 +95,7 @@ const RoleLogin = () => {
       <div className="flex-1 flex items-center justify-center p-8 bg-background relative">
         <div className="w-full max-w-md reveal-item" style={{ animationDelay: '300ms' }}>
           <div className="mb-12 md:hidden">
-            <Link to="/" className="text-2xl font-headline italic font-bold tracking-tighter text-primary">AttendEase</Link>
+            <Link to="/" className="text-2xl font-brand italic font-bold tracking-tighter text-primary">AttendEase</Link>
           </div>
 
           <div className="mb-12">

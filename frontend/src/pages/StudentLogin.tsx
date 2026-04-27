@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 
 const StudentLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
@@ -22,7 +24,7 @@ const StudentLogin = () => {
       return;
     }
     setError('');
-    
+
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
@@ -35,12 +37,9 @@ const StudentLogin = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Handle successful login (e.g., store token, redirect)
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('user', JSON.stringify(data.data.user));
-        // Redirect logic would go here, e.g., window.location.href = '/student/dashboard';
-        console.log('Login successful:', data);
-        alert('Login Successful! (Redirecting to dashboard...)');
+        navigate('/student/dashboard');
       } else {
         setError(data.error || 'Authentication failed');
       }
@@ -50,124 +49,109 @@ const StudentLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-primary font-body flex flex-col">
-      {/* Header */}
-      <nav className="p-10 flex justify-between items-start z-50">
-        <Link to="/" className="text-3xl font-headline italic font-bold tracking-tighter text-primary hover:opacity-70 transition-opacity">
-          AttendEase
-        </Link>
-        <div className="text-[10px] font-bold uppercase tracking-[0.4em] text-text-secondary border-l-[3px] border-primary pl-6 py-1">
-          Student Portal
+    <div className="bg-background text-primary min-h-screen flex items-center justify-center p-gutter font-body-md">
+      <div className="w-full max-w-md reveal-item">
+        {/* Header Section */}
+        <div className="text-center mb-xl">
+          <h2 className="font-headline-md text-headline-md text-on-surface-variant mb-xs tracking-widest uppercase opacity-60">Dayananda Sagar University</h2>
+          <h1 className="text-4xl md:text-5xl font-brand font-black tracking-tighter text-primary leading-none">AttendEase</h1>
         </div>
-      </nav>
 
-      {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-10 py-12">
-        <div className="w-full max-w-[1100px] flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-          
-          {/* Left: Branding/Typography */}
-          <div className="w-full lg:w-1/2 reveal-item" style={{ animationDelay: '200ms' }}>
-            <h1 className="text-6xl md:text-8xl font-bold leading-[0.9] tracking-tighter mb-8">
-              Identity<br/><span className="italic text-accent/80 text-[0.8em]">Verification.</span>
-            </h1>
-            <p className="text-lg md:text-xl font-light italic text-text-secondary max-w-md leading-relaxed">
-              Access your personalized leave management dashboard. Secure authentication required.
-            </p>
-          </div>
+        {/* Login Container */}
+        <div className="bg-surface-container-lowest rounded-lg border border-outline-variant/30 shadow-[0_30px_60px_-15px_rgba(0,6,28,0.05)] overflow-hidden">
+          {/* Form Content */}
+          <div className="p-lg">
+            <div className="mb-lg border-b border-outline-variant/30 pb-4">
+              <h3 className="font-label-lg text-label-lg text-primary uppercase tracking-[0.2em]">Sign In</h3>
+            </div>
 
-          {/* Right: Login Form */}
-          <div className="w-full lg:w-[450px] flex-shrink-0 reveal-item" style={{ animationDelay: '400ms' }}>
-            <div className="bg-surface academic-border p-8 md:p-10 shadow-xl relative">
-              <div className="absolute -top-3 -right-3 bg-primary text-background text-[8px] font-black uppercase tracking-[0.3em] px-4 py-1.5">
-                Auth v.2.0
+            <form className="space-y-md" onSubmit={handleSubmit}>
+              <div>
+                <label className="block font-label-md text-label-md text-on-surface-variant mb-xs" htmlFor="email">Institutional Email</label>
+                <input
+                  className={`w-full bg-surface-container-lowest border ${error && email ? 'border-error' : 'border-outline-variant'} text-on-surface font-body-md text-body-md rounded px-sm py-[12px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-outline`}
+                  id="email"
+                  placeholder="student@dsu.edu.in"
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError('');
+                  }}
+                />
               </div>
-              
-              <form className="space-y-8" onSubmit={handleSubmit}>
-                <div className="space-y-1.5 group">
-                  <label className="text-[9px] font-black uppercase tracking-[0.3em] text-text-secondary group-focus-within:text-primary transition-colors">
-                    University Email / USN
-                  </label>
-                  <input 
-                    type="text" 
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (error) setError('');
-                    }}
-                    placeholder="e.g. eng21cs001@dsu.edu.in"
-                    className={`w-full bg-transparent border-b ${error ? 'border-red-500' : 'border-primary/10'} focus:border-primary py-3 text-base outline-none transition-all placeholder:text-primary/10 font-medium`}
-                  />
-                  {error && (
-                    <p className="text-[8px] font-bold text-red-500 uppercase tracking-tighter mt-1">{error}</p>
-                  )}
+              <div>
+                <div className="flex justify-between items-center mb-xs">
+                  <label className="block font-label-md text-label-md text-on-surface-variant" htmlFor="password">Password</label>
+                  <Link className="font-label-md text-label-md text-primary hover:text-primary-container" to="/forgot-password">Forgot password?</Link>
                 </div>
-
-                <div className="space-y-1.5 group">
-                  <label className="text-[9px] font-black uppercase tracking-[0.3em] text-text-secondary group-focus-within:text-primary transition-colors">
-                    Security Credential
-                  </label>
-                  <input 
-                    type="password" 
+                <div className="relative">
+                  <input
+                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-body-md text-body-md rounded px-sm py-[12px] focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                    id="password"
+                    placeholder="Enter your password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-transparent border-b border-primary/10 focus:border-primary py-3 text-base outline-none transition-all placeholder:text-primary/10"
+                  />
+                  <button
+                    className="absolute right-sm top-1/2 -translate-y-1/2 text-outline hover:text-on-surface"
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                      {showPassword ? 'visibility' : 'visibility_off'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Error Area */}
+              {error && (
+                <div className="bg-error-container text-on-error-container p-sm rounded border border-error/20 flex items-start gap-xs">
+                  <span className="material-symbols-outlined text-error" style={{ fontSize: '18px' }}>error</span>
+                  <p className="font-caption text-caption text-error">{error}</p>
+                </div>
+              )}
+
+              <button className="w-full bg-primary text-on-primary font-label-lg text-label-lg rounded py-[14px] hover:bg-primary-container transition-colors shadow-sm mt-lg" type="submit">
+                Sign In
+              </button>
+
+              <div className="mt-lg relative flex items-center justify-center">
+                <div className="absolute w-full border-t border-outline-variant/30"></div>
+                <span className="bg-surface-container-lowest px-sm font-caption text-caption text-on-surface-variant relative">OR</span>
+              </div>
+
+              <div className="flex justify-center mt-lg w-full">
+                <div className="w-full">
+                  <GoogleLogin
+                    onSuccess={credentialResponse => {
+                      console.log(credentialResponse);
+                      navigate('/student/dashboard');
+                    }}
+                    onError={() => {
+                      setError('Google Login Failed');
+                    }}
+                    theme="outline"
+                    shape="rectangular"
+                    width="384"
                   />
                 </div>
-
-                <div className="pt-6 flex flex-col gap-4">
-                  <button className="w-full bg-primary text-background py-4 text-[9px] font-black uppercase tracking-[0.4em] hover:bg-accent transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0">
-                    Authorize Access
-                  </button>
-
-                  <div className="flex items-center gap-4 py-2">
-                    <div className="h-[1px] flex-1 bg-primary/10"></div>
-                    <span className="text-[7px] font-bold uppercase tracking-widest text-text-secondary">Or Continue With</span>
-                    <div className="h-[1px] flex-1 bg-primary/10"></div>
-                  </div>
-
-                  <div className="flex justify-center">
-                    <GoogleLogin
-                      onSuccess={credentialResponse => {
-                        console.log(credentialResponse);
-                      }}
-                      onError={() => {
-                        console.log('Login Failed');
-                      }}
-                      theme="outline"
-                      shape="square"
-                      width="100%"
-                    />
-                  </div>
-                  
-                  <div className="flex justify-between items-center px-1 pt-2">
-                    <Link to="/forgot-password" className="text-[8px] font-bold uppercase tracking-widest text-text-secondary hover:text-primary transition-colors">
-                      Forgot?
-                    </Link>
-                    <Link to="/" className="text-[8px] font-bold uppercase tracking-widest text-text-secondary hover:text-primary transition-colors">
-                      Back to Gateway
-                    </Link>
-                  </div>
-                </div>
-              </form>
-            </div>
-            
-            {/* Bottom Note */}
-            <div className="mt-8 flex items-center gap-4 opacity-20">
-              <div className="h-[1px] flex-1 bg-primary"></div>
-              <span className="text-[7px] font-black uppercase tracking-[0.5em] whitespace-nowrap">Secure Session</span>
-              <div className="h-[1px] flex-1 bg-primary"></div>
-            </div>
+              </div>
+            </form>
           </div>
-
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="p-10 text-[9px] font-bold uppercase tracking-[0.3em] text-text-secondary/50 flex justify-between">
-        <div>© 2026 AttendEase Intelligence</div>
-        <div className="italic">Dayananda Sagar University Proprietary</div>
-      </footer>
+        {/* Footer Links */}
+        <div className="mt-lg text-center flex justify-center items-center gap-md">
+          <Link className="font-caption text-caption text-on-surface-variant hover:text-primary" to="/privacy">Privacy Policy</Link>
+          <span className="text-outline-variant">•</span>
+          <Link className="font-caption text-caption text-on-surface-variant hover:text-primary" to="/help">Help Center</Link>
+          <span className="text-outline-variant">•</span>
+          <Link className="font-caption text-caption text-on-surface-variant hover:text-primary" to="/">Gateway</Link>
+        </div>
+      </div>
     </div>
   );
 };

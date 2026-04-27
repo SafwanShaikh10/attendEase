@@ -4,6 +4,8 @@ import LandingPage from './pages/LandingPage';
 import StudentLogin from './pages/StudentLogin';
 import ForgotPassword from './pages/ForgotPassword';
 import RoleLogin from './pages/RoleLogin';
+import RoleDashboard from './pages/RoleDashboard';
+import StudentDashboard from './pages/StudentDashboard';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -18,6 +20,8 @@ function App() {
           <Route path="/year-coordinator/login" element={<RoleLogin />} />
           <Route path="/chairperson/login" element={<RoleLogin />} />
           <Route path="/admin/login" element={<RoleLogin />} />
+          <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route path="/:role/dashboard" element={<RoleDashboard />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Routes>
       </BrowserRouter>

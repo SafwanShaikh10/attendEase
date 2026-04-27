@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -13,15 +12,7 @@ const LandingPage = () => {
     window.scrollTo(0, 0);
     const timer = setTimeout(() => window.scrollTo(0, 0), 10);
 
-    // Instant reveal for navbar
-    const navItems = document.querySelectorAll('.nav-reveal');
-    navItems.forEach((item) => {
-      setTimeout(() => {
-        item.classList.add('active');
-      }, 100);
-    });
-
-    // Intersection Observer for scroll-based reveals
+    // Intersection Observer for scroll animations
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px'
@@ -35,7 +26,7 @@ const LandingPage = () => {
       });
     }, observerOptions);
 
-    const revealNodes = document.querySelectorAll('.reveal-node');
+    const revealNodes = document.querySelectorAll('.reveal-node, .nav-reveal, .reveal-item');
     revealNodes.forEach(node => {
       observer.observe(node);
     });
@@ -53,7 +44,7 @@ const LandingPage = () => {
     <div className="bg-background text-primary">
       <nav className="fixed top-0 w-full z-[100] px-10 py-8 flex justify-between items-start pointer-events-none">
         <div className="pointer-events-auto nav-reveal" style={{ transitionDelay: '100ms' }}>
-          <div className="text-3xl font-headline italic font-bold tracking-tighter text-primary">AttendEase</div>
+          <div className="text-3xl font-brand italic font-bold tracking-tighter text-primary">AttendEase</div>
         </div>
         <div className="hidden md:flex flex-col gap-2 items-end pointer-events-auto">
           <a className="text-[10px] uppercase tracking-widest hover:italic transition-all text-primary nav-reveal" href="#journey" style={{ transitionDelay: '200ms' }}>01. Process</a>
@@ -120,7 +111,7 @@ const LandingPage = () => {
                 <div className="bleed-text font-bold text-primary">REVIEW</div>
                 <div className="relative z-10">
                   <div className="text-6xl font-headline italic font-bold text-secondary mb-8">02/</div>
-                  <h3 className="text-4xl md:text-6xl font-bold uppercase leading-none mb-6 text-primary">Division<br />Lead</h3>
+                  <h3 className="text-4xl md:text-6xl font-bold uppercase leading-none mb-6 text-primary">Class<br />Coordinator</h3>
                   <p className="text-lg md:text-xl font-medium max-w-xs leading-tight text-primary/80">Primary verification of division-specific requests and attendance impact</p>
                 </div>
                 <div className="mt-auto border-t border-primary/20 pt-6">
@@ -133,7 +124,7 @@ const LandingPage = () => {
                 <div className="bleed-text font-bold text-primary">APPROVAL</div>
                 <div className="relative z-10">
                   <div className="text-6xl font-headline italic font-bold text-secondary mb-8">03/</div>
-                  <h3 className="text-4xl md:text-6xl font-bold uppercase leading-none mb-6 text-primary">Year<br />Head</h3>
+                  <h3 className="text-4xl md:text-6xl font-bold uppercase leading-none mb-6 text-primary">Year-Wise<br />Coordinator</h3>
                   <p className="text-lg md:text-xl font-medium max-w-xs leading-tight text-primary/80">Final administrative authority for standard OD and Medical clearances</p>
                 </div>
                 <div className="mt-auto border-t border-primary/20 pt-6">
@@ -192,7 +183,7 @@ const LandingPage = () => {
             </Link>
             <Link to="/coordinator/login" className="grid grid-cols-12 py-16 group portal-hover transition-all cursor-pointer px-6 reveal-node block relative z-10" style={{ transitionDelay: '200ms' }}>
               <div className="col-span-1 text-xl font-headline italic opacity-30 text-primary">02</div>
-              <div className="col-span-4 text-3xl md:text-5xl font-headline font-bold text-primary">Coordinator</div>
+              <div className="col-span-4 text-3xl md:text-5xl font-headline font-bold text-primary">Class Coordinator</div>
               <div className="col-span-5 hidden md:flex items-center gap-10">
                 <span className="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60 text-primary">Batch Processing</span>
                 <span className="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60 text-primary">Data Export</span>
@@ -204,7 +195,7 @@ const LandingPage = () => {
             </Link>
             <Link to="/year-coordinator/login" className="grid grid-cols-12 py-16 group portal-hover transition-all cursor-pointer px-6 reveal-node block relative z-10" style={{ transitionDelay: '300ms' }}>
               <div className="col-span-1 text-xl font-headline italic opacity-30 text-primary">03</div>
-              <div className="col-span-4 text-3xl md:text-5xl font-headline font-bold text-primary">Year Head</div>
+              <div className="col-span-4 text-3xl md:text-5xl font-headline font-bold text-primary">Year-Wise Coordinator</div>
               <div className="col-span-5 hidden md:flex items-center gap-10">
                 <span className="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60 text-primary">Final Authorization</span>
                 <span className="text-[9px] uppercase tracking-[0.25em] font-bold opacity-60 text-primary">Cross-Division View</span>
@@ -270,9 +261,9 @@ const LandingPage = () => {
                 <img alt="Project Lead" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO9_MyzujG8laCMgDeb9yFaMMA1leYP-6HIlWeH6rTV2YjB8gaaRG4LmAknICdUbFguNJCpgUxOUOoZiyCknD0AjTGkDF6V-hfA1F8iglFQPgdVQSex9CiEkETHC2cOKaDA5NFFpaYsQLkpbBqAZCYQovO9tP1LJFq_VQeI6nj4XWCpqFHr-dWD-jzMJUaFECI1hh3B6Axk5BHEKlM0AJS5oqVMJfb0QgDSttSRSoHpHx7APRmfP8W0jY6K5sWt4LdTqefk7-xwas" />
               </div>
               <div>
-                <h4 className="text-4xl font-headline font-bold mb-4 text-primary">Siddharth R.</h4>
+                <h4 className="text-4xl font-headline font-bold mb-4 text-primary">Safwan M Shaikh</h4>
                 <p className="text-[10px] uppercase tracking-[0.2em] font-bold mb-4 text-secondary">School of Engineering</p>
-                <p className="text-[11px] text-text-primary/70 leading-loose mb-12 italic">Class of 2025 • Dayananda Sagar University</p>
+                <p className="text-[11px] text-text-primary/70 leading-loose mb-12 italic">Class of 2027 • Dayananda Sagar University</p>
                 <div className="flex gap-8">
                   <a className="text-[9px] font-bold tracking-widest uppercase hover:text-secondary transition-colors text-primary" href="https://github.com/SafwanShaikh10">GITHUB</a>
                   <a className="text-[9px] font-bold tracking-widest uppercase hover:text-secondary transition-colors text-primary" href="https://www.linkedin.com/in/safwan-shaikh-dsu/">LINKEDIN</a>
@@ -287,7 +278,7 @@ const LandingPage = () => {
         <div className="max-w-[1400px] mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start gap-12">
             <div className="space-y-6">
-              <p className="text-4xl font-headline font-bold tracking-tighter text-primary">AttendEase</p>
+              <p className="text-4xl font-brand font-bold tracking-tighter text-primary">AttendEase</p>
               <p className="text-[10px] uppercase tracking-[0.4em] font-bold text-secondary">Student Information &amp; Requests</p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-20">
